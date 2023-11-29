@@ -10,8 +10,11 @@ on:
 jobs:
   echo-context:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - run: python workflow_run.py
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKFLOW_RUN: "${{ toJson(github.event.workflow_run) }}"
