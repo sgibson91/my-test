@@ -75,10 +75,12 @@ for artifact in filtered_artifacts:
     with open(f"name.txt") as f:
         artifact_contents.append(f.read().strip("\n"))
 
+artifact_contents = "\n- ".join(artifact_contents)
+
 # Comment artifact content to merged PR
 comment = dedent(f"""Uploaded images:
 
-- {'\n- '.join(artifact_contents)}""")
+- {artifact_contents}""")
 
 url = "/".join([api_url, "repos", workflow_run["repository"]["full_name"], "issues", pr_number, "comments"])
 requests.post(url, headers=headers, json={"body": comment})
