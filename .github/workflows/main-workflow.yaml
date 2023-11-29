@@ -9,4 +9,9 @@ jobs:
   echo:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "hello world"
+      - run: echo "hello world" > hello-world.txt
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hello-world
+          path: hello-world.txt
