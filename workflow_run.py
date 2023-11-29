@@ -28,6 +28,15 @@ headers = {
     "Authorization": f"Bearer {token}",
 }
 
+# Use regex to extract the PR number from the commit message
+match = re.search("(?<=#)[0-9]*", workflow_run["head_commit"]["message"])
+pr_number = None if match is None else match.group(0)
+
+# Check if 'Merge pull request' appears in the commit message. Continue execution
+# if it DOES.
+if "Merge pull request" not in commit_msg:
+    sys.exit()
+
 # List all artifacts for the workflow run
 resp = requests.get(workflow_run["artifacts_url"], headers=headers, params={"per_page": 100})
 all_artifacts = resp.json()["artifacts"]
@@ -63,4 +72,9 @@ with zipfile.ZipFile(io.BytesIO(resp.content)) as zip_ref:
 with open(f"{artifact_name}.txt") as f:
     artifact_content = f.read().strip("\n")
 
-print(artifact_content)
+# Comment artifact content to merged PR
+url = "/".join([api_url, "repos", workflow_run["repository"]["full_name"], "issues", pr_number, "comments"])
+body = {
+    "body": f"{artifact_content}"
+}
+requests.post(url, headers=headers, json=body)
