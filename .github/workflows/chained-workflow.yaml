@@ -11,4 +11,6 @@ jobs:
   echo-context:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "${{ toJson(github.event.workflow_run) }}"
+      - run: python workflow_run.py
+        env:
+          WORKFLOW_RUN: "${{ toJson(github.event.workflow_run) }}"
