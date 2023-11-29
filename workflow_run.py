@@ -81,4 +81,4 @@ comment = dedent(f"""Uploaded images:
 - {'\n- '.join(artifact_contents)}""")
 
 url = "/".join([api_url, "repos", workflow_run["repository"]["full_name"], "issues", pr_number, "comments"])
-requests.post(url, headers=headers, json={"body": comment)
+requests.post(url, headers=headers, json={"body": comment})
