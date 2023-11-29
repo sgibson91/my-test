@@ -6,12 +6,15 @@ on:
       - main
 
 jobs:
-  echo:
+  create-artifacts:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name: ["hello", "world"]
     steps:
-      - run: echo "hello world" > hello-world.txt
+      - run: echo "${{ matrix.jobs.name }}" > ${{ matrix.jobs.name }}-name.txt
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: hello-world
-          path: hello-world.txt
+          name: "${{ matrix.jobs.name }}-name"
+          path: ${{ matrix.jobs.name}}-name.txt
