@@ -50,4 +50,4 @@ if artifact_id is None:
     print(f"No artifact found called '{artifact_name}' for workflow run: {run_id}")
     sys.exit()
 
-print(all_artifacts[i])
+print(all_artifacts[indx])
