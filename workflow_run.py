@@ -35,7 +35,7 @@ pr_number = None if match is None else match.group(0)
 
 # Check if 'Merge pull request' appears in the commit message. Continue execution
 # if it DOES.
-if "Merge pull request" not in commit_msg:
+if "Merge pull request" not in workflow_run["head_commit"]["message"]:
     sys.exit()
 
 # List all artifacts for the workflow run
