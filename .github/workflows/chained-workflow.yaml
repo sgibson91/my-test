@@ -1,0 +1,14 @@
+name: chained
+
+on:
+  workflow_run:
+    workflows:
+      - main
+    types:
+      - completed
+
+jobs:
+  echo-context:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ github.event.workflow_run }}
