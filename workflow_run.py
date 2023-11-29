@@ -3,9 +3,9 @@ import os
 import re
 import sys
 import json
-import zipfile
-
 import requests
+import zipfile
+from textwrap import dedent
 
 api_url = "https://api.github.com"
 
@@ -19,9 +19,6 @@ workflow_run = os.environ.get("WORKFLOW_RUN", None)
 if workflow_run is None:
     raise ValueError("WORKFLOW_RUN must be set!")
 workflow_run = json.loads(workflow_run)
-
-# Artifact name
-artifact_name = os.environ.get("ARTIFACT_NAME", "hello-world")
 
 # Set headers to send with requests
 headers = {
@@ -52,30 +49,36 @@ while ("Link" in resp.headers.keys()) and ('rel="next"' in res.headers["Link"]
     resp = requests.get(next_url.group(0), headers=headers)
     all_artifacts.extend(resp.json()["artifacts"])
 
-# Filter for the artifact with the name we want: 'hello-world'
-indx, artifact_id = next(
-    ((i, artifact["id"]) for i, artifact in enumerate(all_artifacts) if artifact["name"] == artifact_name),
-    (None, None),
-)
+# Filter for the artifact with the name we want: ending in '-name'
+filtered_artifacts = [
+    i
+    for i, artifact in enumerate(all_artifacts)
+    if artifact["name"].endswith("-name")
+]
 
-if artifact_id is None:
-    print(f"No artifact found called '{artifact_name}' for workflow run: {run_id}")
+if len(filtered_artifacts) == 0:
+    print(f"No artifacts found ending with '-name' for workflow run: {run_id}")
     sys.exit()
 
-# Download the artifact
-resp = requests.get(all_artifacts[indx]["archive_download_url"], headers=headers, stream=True)
+# Empty list to store artifact contents in
+artifact_contents = []
 
-# Extract the zip archive
-with zipfile.ZipFile(io.BytesIO(resp.content)) as zip_ref:
-    zip_ref.extractall(os.getcwd())
+# Download the artifacts
+for artifact in filtered_artifacts:
+    resp = requests.get(all_artifacts[artifact]["archive_download_url"], headers=headers, stream=True)
 
-# Read in file
-with open(f"{artifact_name}.txt") as f:
-    artifact_content = f.read().strip("\n")
+    # Extract the zip archive
+    with zipfile.ZipFile(io.BytesIO(resp.content)) as zip_ref:
+        zip_ref.extractall(os.getcwd())
+
+    # Read in file
+    with open(f"name.txt") as f:
+        artifact_contents.append(f.read().strip("\n"))
 
 # Comment artifact content to merged PR
+comment = dedent(f"""Uploaded images:
+
+- {'\n- '.join(artifact_contents)}""")
+
 url = "/".join([api_url, "repos", workflow_run["repository"]["full_name"], "issues", pr_number, "comments"])
-body = {
-    "body": f"{artifact_content}"
-}
-requests.post(url, headers=headers, json=body)
+requests.post(url, headers=headers, json={"body": comment)
