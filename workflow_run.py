@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import zipfile
 
 import requests
 
@@ -50,4 +51,15 @@ if artifact_id is None:
     print(f"No artifact found called '{artifact_name}' for workflow run: {run_id}")
     sys.exit()
 
-print(all_artifacts[indx])
+# Download the artifact
+resp = requests.get(all_artifacts[indx]["archive_download_url"], headers=headers, stream=True)
+
+# Extract the zip archive
+with zipfile.ZipFile(io.BytesIO(resp.content)) as zip_ref:
+    zip_ref.extractall(os.getcwd())
+
+# Read in file
+with open(f"{artifact_name}.txt") as f:
+    artifact_content = f.read().strip("\n")
+
+print(artifact_content)
