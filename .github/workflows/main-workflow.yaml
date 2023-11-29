@@ -12,9 +12,9 @@ jobs:
       matrix:
         name: ["hello", "world"]
     steps:
-      - run: echo "${{ matrix.name }}" > ${{ matrix.name }}-name.txt
+      - run: echo "${{ matrix.name }}" > name.txt
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.name }}-name"
-          path: ${{ matrix.name}}-name.txt
+          path: name.txt
